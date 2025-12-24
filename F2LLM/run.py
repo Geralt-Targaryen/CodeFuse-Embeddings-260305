@@ -61,13 +61,14 @@ if accelerator.is_main_process:
         json.dump(args.dict(), f, indent=2)
 
 train_datasets, valid_datasets = [], []
-for f in sorted(os.listdir(args.train_data_path)):
-    dataset_name = f.split('.parquet')[0]
-    dataset = load_dataset("parquet", data_files=os.path.join(args.train_data_path, f), cache_dir=args.cache_dir)['train']
-    dataset = dataset.add_column("dataset_name", [dataset_name]*len(dataset))
-    dataset = dataset.train_test_split(train_size=0.99, shuffle=True, seed=0)
-    train_datasets.append((dataset_name, dataset['train']))
-    valid_datasets.append((dataset_name, dataset['test']))
+with accelerator.main_process_first():
+    for f in sorted(os.listdir(args.train_data_path)):
+        dataset_name = f.split('.parquet')[0]
+        dataset = load_dataset("parquet", data_files=os.path.join(args.train_data_path, f), cache_dir=args.cache_dir)['train']
+        dataset = dataset.add_column("dataset_name", [dataset_name]*len(dataset))
+        dataset = dataset.train_test_split(train_size=0.99, shuffle=True, seed=0)
+        train_datasets.append((dataset_name, dataset['train']))
+        valid_datasets.append((dataset_name, dataset['test']))
 
 tokenizer = AutoTokenizer.from_pretrained(args.model_path)
 
@@ -150,4 +151,4 @@ accelerator.print(f"******************************** Training step after prepare
 
 
 accelerate_train(args, accelerator, model, train_dataloader, valid_loaders,
-                 optimizer, lr_scheduler, len(dataset))
+                 optimizer, lr_scheduler, sum(len(d) for d in train_datasets))
