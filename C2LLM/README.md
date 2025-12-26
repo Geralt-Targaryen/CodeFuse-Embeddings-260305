@@ -117,6 +117,22 @@ If you find this project helpful, please give it a star. It means a lot to us!
 
 [![GitHub stars](https://img.shields.io/github/stars/codefuse-ai/CodeFuse-Embeddings?style=social)](https://github.com/codefuse-ai/CodeFuse-Embeddings/tree/main)
 
+You are also welcom to cite our technical report:
+
+```
+@article{2025C2LLM,
+  title={C2LLM Technical Report: A New Frontier in Code Retrieval via Adaptive Cross-Attention Pooling}, 
+      author={Jin Qin and Zihan Liao and Ziyin Zhang and Hang Yu and Peng Di and Rui Wang},
+  journal      = {CoRR},
+  volume       = {abs/2512.21332},
+  year         = {2025},
+  url          = {https://doi.org/10.48550/arXiv.2512.21332},
+  doi          = {10.48550/ARXIV.2512.21332},
+  eprinttype    = {arXiv},
+  eprint       = {2512.21332}
+}
+```
+
 ### Contact us
 
 Email: <hyu.hugo@antgroup.com>
