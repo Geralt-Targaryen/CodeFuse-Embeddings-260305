@@ -151,4 +151,4 @@ accelerator.print(f"******************************** Training step after prepare
 
 
 accelerate_train(args, accelerator, model, train_dataloader, valid_loaders,
-                 optimizer, lr_scheduler, sum(len(d) for d in train_datasets))
+                 optimizer, lr_scheduler, sum(len(d[1]) for d in train_datasets))
