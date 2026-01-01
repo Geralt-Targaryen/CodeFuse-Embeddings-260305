@@ -24,6 +24,7 @@ accelerator.print(args)
 
 def _stack(input_ids, max_len):
     data = [ids[:max_len] for ids in input_ids]     # input_ids: list of lists
+    data = [ids if ids[-1] == tokenizer.eos_token_id else ids[:-1] + [tokenizer.eos_token_id] for ids in data]
     lens = [len(x) for x in data]
     tensor = torch.tensor(sum(data, []))            # (total_tokens,)
     return tensor.split(lens)                       # list of 1-d tensors
