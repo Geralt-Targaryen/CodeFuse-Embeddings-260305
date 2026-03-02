@@ -16,5 +16,7 @@
   "train_epochs": 2,
   "log_interval": 100,
   "num_hard_neg": 7,
+  "num_hard_neg_clustering": 9,
+  "scheduler_type": "cosine",
   "use_mrl": true
 }
