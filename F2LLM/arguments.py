@@ -21,6 +21,9 @@ class Args:
     warmup_steps: int = 100
     # MRL
     use_mrl: bool = False
+    # knowledge distillation (kd)
+    teacher_model_path: str = None
+    kd_weight: float = 1.0     # weight for the distillation loss
     # cosine or constant_with_warmup
     scheduler_type: str = "cosine"
     # embedding-related settings

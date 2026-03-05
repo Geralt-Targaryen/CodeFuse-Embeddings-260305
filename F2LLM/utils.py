@@ -81,7 +81,7 @@ def hard_loss(
         use_mrl=False,
         mrl_dims=None
     ):
-    
+
     if hard_neg_embeddings is None:
         return 0.0
 
@@ -151,7 +151,8 @@ def accelerate_train(args,
                      valid_loader_dict,
                      optimizer,
                      lr_scheduler,
-                     num_train_samples):
+                     num_train_samples,
+                     teacher=None):
     accelerator.print("**************************************** Start training ****************************************")
     accelerator.print(f" Num train samples = {num_train_samples}")
     accelerator.print(f" Num epochs = {args.train_epochs}")
@@ -190,9 +191,21 @@ def accelerate_train(args,
             # passage features: [bs, 1, d]
             # hard_neg_features: [bs, num_hard_neg, d]
 
-            loss, loss_hard = 0.0, 0.0
+            # teacher forward
+            if teacher is not None:
+                with torch.no_grad():
+                    teacher_outputs = teacher.forward(batch, accelerator)
+
+            loss, loss_hard, loss_kd = 0.0, 0.0, 0.0
             for i, output in enumerate(outputs):
                 loss_hard += hard_loss(output['query_passage_features'].squeeze(1), output['passage_passage_features'].squeeze(1), output['negative_passage_features'], criterion, accelerator, use_mrl=args.use_mrl, mrl_dims=mrl_dims)
+                # kd loss
+                if teacher is not None:
+                    t_out = teacher_outputs[i]
+                    d = output['query_passage_features'].shape[-1]
+                    loss_kd += F.mse_loss(output['query_passage_features'], t_out['query_passage_features'][..., :d])
+                    loss_kd += F.mse_loss(output['passage_passage_features'], t_out['passage_passage_features'][..., :d])
+                    loss_kd += F.mse_loss(output['negative_passage_features'], t_out['negative_passage_features'][..., :d])
 
             dataset_name = batch['dataset_name']
             count_hard_dict[dataset_name] += 1
@@ -204,7 +217,7 @@ def accelerate_train(args,
                 count_dict[dataset_name] += 1
                 loss_dict[dataset_name] += loss.detach().float()
             
-            loss_total = (loss + loss_hard) / len(outputs)
+            loss_total = (loss + loss_hard + args.kd_weight * loss_kd) / len(outputs)
 
             # backward, optimizer, scheduler
             accelerator.backward(loss_total)
