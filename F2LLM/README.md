@@ -20,6 +20,7 @@ Models and data of V1 are available at:
 🔥🔥 **New features in V2**:
 
 - Add support for Matryoshka Representation Learning (MRL)
+- Add support for knowledge distillation (KD)
 - Switched to a more disk-efficient data format.
 
 In this repo we provide a streamlined and efficient script for training embedding models. To reproduce the training of F2LLMs, please:
