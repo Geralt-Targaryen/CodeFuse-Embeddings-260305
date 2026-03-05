@@ -140,6 +140,17 @@ model.lm.gradient_checkpointing_enable()
 # set seed again to make sure that different models share the same seed
 set_seed(0)
 
+# teacher model for kd
+teacher = None
+if args.teacher_model_path:
+    accelerator.print(f"Loading teacher model from {args.teacher_model_path}")
+    teacher = F2LLM(args.teacher_model_path, args.max_seq_length, args=args, accelerator=accelerator)
+    teacher.lm.eval()
+    teacher.lm.requires_grad_(False)
+    # Move teacher to device manually
+    teacher.lm.to(accelerator.device)
+    teacher.set_device()
+
 param_groups = [
     {
         "params": list(model.lm.parameters()),
@@ -173,4 +184,4 @@ accelerator.print(f"******************************** Training step after prepare
 
 
 accelerate_train(args, accelerator, model, train_dataloader, valid_loaders,
-                 optimizer, lr_scheduler, sum(len(d[1]) for d in train_datasets))
+                 optimizer, lr_scheduler, sum(len(d[1]) for d in train_datasets), teacher=teacher)
